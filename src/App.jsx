@@ -21,6 +21,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ApiKeyManager from './components/ApiKeyManager'
 import Settings from './components/Settings'
+import ThemeToggle from './components/ThemeToggle'
 import { useApiKey } from './hooks/useApiKey'
 import ImageInputPanel from './components/ImageInputPanel'
 import ImageDisplay from './components/ImageDisplay'
@@ -267,15 +268,15 @@ Only return the JSON array, no other text or explanation.`
 
   // Affichage de la page principale
   return (
-    <div className="min-h-screen bg-gray-100 p-2 sm:p-4">
+    <div className="min-h-screen bg-background p-2 sm:p-4">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Navigation et titre */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Bill Splitter</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Bill Splitter</h1>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
             {/* Sélection du modèle dans l'entête */}
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Modèle:</span>
+              <span className="text-sm font-medium text-foreground">Modèle:</span>
               <Select value={selectedModel} onValueChange={handleModelChange}>
                 <SelectTrigger className="w-full sm:w-48 h-10">
                   <SelectValue placeholder="Sélectionnez un modèle" />
@@ -289,6 +290,7 @@ Only return the JSON array, no other text or explanation.`
                 </SelectContent>
               </Select>
             </div>
+            <ThemeToggle />
             <Button variant="outline" onClick={() => setCurrentPage('settings')} className="h-10 px-4">
               ⚙️ Paramètres
             </Button>

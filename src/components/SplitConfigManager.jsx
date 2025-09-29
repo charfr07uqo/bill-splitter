@@ -24,6 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Plus, Trash2, Palette } from 'lucide-react'
+import { useTheme } from '@/hooks/useTheme'
 
 /**
  * Obtient la couleur principale d'un groupe (même logique que TriStateCheckbox)
@@ -209,6 +210,7 @@ export function useSplitConfig() {
  */
 function SplitConfigManager() {
   const { config, saveConfig, generateColorPrompt, generateSplitStateDescription, getUsedColors } = useSplitConfig()
+  const { isDark } = useTheme()
 
   /**
    * Met à jour le nom d'un groupe
@@ -304,7 +306,7 @@ function SplitConfigManager() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Groupe Commun (non modifiable) */}
-          <div className="flex items-center justify-between p-3 border rounded-lg bg-blue-50">
+          <div className={`flex items-center justify-between p-3 border rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-600">Label:</span>
@@ -312,7 +314,7 @@ function SplitConfigManager() {
                   <Input
                     value="C"
                     disabled
-                    className="w-12 text-center font-bold h-8 bg-gray-100"
+                    className={`w-12 text-center font-bold h-8 ${isDark ? 'bg-muted' : 'bg-gray-100'}`}
                   />
                   {/* Indicateur de couleur du label */}
                   <div
@@ -326,7 +328,7 @@ function SplitConfigManager() {
               <Input
                 value="Commun"
                 disabled
-                className="w-32 font-medium bg-gray-100"
+                className={`w-32 font-medium ${isDark ? 'bg-muted' : 'bg-gray-100'}`}
               />
               <div className="text-sm text-gray-500 italic">
                 Groupe par défaut (éléments sans couleur)

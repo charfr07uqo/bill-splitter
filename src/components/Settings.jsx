@@ -115,7 +115,7 @@ function Settings({ onBack }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen bg-background p-4">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Bouton retour */}
         <div className="flex justify-start">
@@ -126,8 +126,8 @@ function Settings({ onBack }) {
 
         {/* Titre de la page */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Paramètres</h1>
-          <p className="text-gray-600 mt-2">Configurez votre clé API et les paramètres de traitement</p>
+          <h1 className="text-3xl font-bold text-foreground">Paramètres</h1>
+          <p className="text-muted-foreground mt-2">Configurez votre clé API et les paramètres de traitement</p>
         </div>
 
         {/* Gestionnaire de clé API */}
@@ -146,7 +146,7 @@ function Settings({ onBack }) {
                 onChange={handleInputChange}
                 placeholder="Entrez votre clé API"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 La clé API est sauvegardée automatiquement après 1 seconde d'inactivité
               </p>
             </div>
@@ -159,7 +159,7 @@ function Settings({ onBack }) {
 
         {/* Configuration des répartitions */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Configuration des Répartitions</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Configuration des Répartitions</h2>
           <SplitConfigManager />
         </div>
 
@@ -170,7 +170,7 @@ function Settings({ onBack }) {
             <CardTitle>Informations</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 text-sm text-gray-600">
+            <div className="space-y-2 text-sm text-muted-foreground">
               <p>• La clé API est stockée localement dans votre navigateur</p>
               <p>• Les paramètres sont sauvegardés automatiquement</p>
               <p>• Vous pouvez obtenir une clé API sur <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Google AI Studio</a></p>

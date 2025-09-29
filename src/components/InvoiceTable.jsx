@@ -44,31 +44,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
+import { useTheme } from "@/hooks/useTheme"
 import { MoreHorizontal, Plus, Trash2 } from "lucide-react"
 import TriStateCheckbox from "./TriStateCheckbox"
 
 /**
- * Obtient la classe CSS pour la couleur claire d'un groupe
+ * Obtient la classe CSS pour la couleur d'un groupe selon le thème
  * @param {Array} colors - Liste des couleurs du groupe
- * @returns {string} Classe CSS pour la couleur claire
+ * @param {boolean} isDark - Si le thème sombre est actif
+ * @returns {string} Classe CSS pour la couleur du groupe
  */
-function getGroupLightColor(colors) {
-  if (!colors || colors.length === 0) return 'bg-gray-50 text-gray-800'
+function getGroupColor(colors, isDark) {
+  if (!colors || colors.length === 0) return isDark ? 'bg-muted text-foreground' : 'bg-gray-50 text-gray-800'
 
-  const lightMap = {
-    'red': 'bg-red-50 text-red-800',
-    'pink': 'bg-pink-50 text-pink-800',
-    'orange': 'bg-orange-50 text-orange-800',
-    'yellow': 'bg-yellow-50 text-yellow-800',
-    'green': 'bg-green-50 text-green-800',
-    'lime': 'bg-lime-50 text-lime-800',
-    'cyan': 'bg-cyan-50 text-cyan-800',
-    'blue': 'bg-blue-50 text-blue-800',
-    'purple': 'bg-purple-50 text-purple-800',
-    'violet': 'bg-violet-50 text-violet-800'
+  const colorMap = {
+    'red': isDark ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-800',
+    'pink': isDark ? 'bg-pink-900/20 text-pink-300' : 'bg-pink-50 text-pink-800',
+    'orange': isDark ? 'bg-orange-900/20 text-orange-300' : 'bg-orange-50 text-orange-800',
+    'yellow': isDark ? 'bg-yellow-900/20 text-yellow-300' : 'bg-yellow-50 text-yellow-800',
+    'green': isDark ? 'bg-green-900/20 text-green-300' : 'bg-green-50 text-green-800',
+    'lime': isDark ? 'bg-lime-900/20 text-lime-300' : 'bg-lime-50 text-lime-800',
+    'cyan': isDark ? 'bg-cyan-900/20 text-cyan-300' : 'bg-cyan-50 text-cyan-800',
+    'blue': isDark ? 'bg-blue-900/20 text-blue-300' : 'bg-blue-50 text-blue-800',
+    'purple': isDark ? 'bg-purple-900/20 text-purple-300' : 'bg-purple-50 text-purple-800',
+    'violet': isDark ? 'bg-violet-900/20 text-violet-300' : 'bg-violet-50 text-violet-800'
   }
 
-  return lightMap[colors[0]] || 'bg-gray-50 text-gray-800'
+  return colorMap[colors[0]] || (isDark ? 'bg-muted text-foreground' : 'bg-gray-50 text-gray-800')
 }
 
 /**
@@ -90,6 +92,9 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
 
   // Hook pour les notifications
   const { toast } = useToast()
+
+  // Hook pour le thème
+  const { isDark } = useTheme()
 
   // Synchroniser editableItems avec les props items
   useEffect(() => {
@@ -391,7 +396,7 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                         variant="ghost"
                         size="sm"
                         onClick={() => handleAddRow(-1)}
-                        className="h-5 w-5 p-0 text-gray-400 hover:text-blue-600 text-xs"
+                        className="h-5 w-5 p-0 text-muted-foreground hover:text-blue-600 text-xs"
                       >
                         +
                       </Button>
@@ -544,7 +549,7 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                         variant="ghost"
                         size="sm"
                         onClick={() => handleAddRow(index)}
-                        className="h-4 w-4 p-0 text-gray-400 hover:text-blue-600 text-xs"
+                        className="h-4 w-4 p-0 text-muted-foreground hover:text-blue-600 text-xs"
                       >
                         +
                       </Button>
@@ -585,11 +590,11 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
            const totalAmount = totals[totalKey] || 0;
 
            // Couleur dynamique basée sur la configuration
-           let colorClass = 'bg-gray-50 text-gray-800';
+           let colorClass = 'bg-muted text-foreground';
            if (group.id === 'commun') {
-             colorClass = 'bg-blue-50 text-blue-800';
+             colorClass = isDark ? 'bg-blue-900/20 text-blue-300' : 'bg-blue-50 text-blue-800';
            } else {
-             colorClass = getGroupLightColor(group.colors);
+             colorClass = getGroupColor(group.colors, isDark);
            }
 
            return (
@@ -745,14 +750,14 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                         setEditableItems(updatedItems)
                         if (onItemsChange) onItemsChange(updatedItems)
                       }}
-                      className="text-base font-medium border-0 p-0 h-auto bg-transparent focus:bg-gray-50"
+                      className="text-base font-medium border-0 p-0 h-auto bg-transparent focus:bg-muted"
                       placeholder="Nom de l'article"
                     />
 
                     {/* Amount and Total Row */}
                     <div className="flex justify-between items-end">
                       <div className="flex-1 mr-4">
-                        <label className="text-xs text-gray-500 block mb-1">Montant de base</label>
+                        <label className="text-xs text-muted-foreground block mb-1">Montant de base</label>
                         <Input
                           type="number"
                           step="0.01"
@@ -764,7 +769,7 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                         />
                       </div>
                       <div className="text-right min-w-0">
-                        <label className="text-xs text-gray-500 block mb-1">Total</label>
+                        <label className="text-xs text-muted-foreground block mb-1">Total</label>
                         <div className="text-lg font-bold text-green-600">
                           {formatAmount(taxes.total)}
                         </div>
@@ -774,7 +779,7 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                     {/* Tax Code and Split Row */}
                     <div className="flex justify-between items-end">
                       <div className="flex-1 mr-4">
-                        <label className="text-xs text-gray-500 block mb-1">Taxes</label>
+                        <label className="text-xs text-muted-foreground block mb-1">Taxes</label>
                         <Select
                           value={item.taxCode || 'rien'}
                           onValueChange={(value) => handleTaxCodeChange(index, value)}
@@ -803,7 +808,7 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                         </Select>
                       </div>
                       <div className="min-w-0">
-                        <label className="text-xs text-gray-500 block mb-1">Répartition</label>
+                        <label className="text-xs text-muted-foreground block mb-1">Répartition</label>
                         <TriStateCheckbox
                           value={item.splitState}
                           onChange={(newState) => handleSplitStateChange(index, newState)}
@@ -843,7 +848,7 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
 
         {/* Mobile Totals */}
         {!loading && editableItems.length > 0 && (
-          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+          <div className="bg-muted rounded-lg p-4 space-y-2">
             <div className="flex justify-between">
               <span className="font-medium">Sous-total</span>
               <span className="font-medium">{formatAmount(totals.subtotal)}</span>
@@ -861,11 +866,11 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
               const totalAmount = totals[totalKey] || 0;
 
               // Couleur dynamique basée sur la configuration (même logique que desktop)
-              let colorClass = 'bg-gray-50 text-gray-800';
+              let colorClass = 'bg-muted text-foreground';
               if (group.id === 'commun') {
-                colorClass = 'bg-blue-50 text-blue-800';
+                colorClass = isDark ? 'bg-blue-900/20 text-blue-300' : 'bg-blue-50 text-blue-800';
               } else {
-                colorClass = getGroupLightColor(group.colors);
+                colorClass = getGroupColor(group.colors, isDark);
               }
 
               return (

@@ -169,16 +169,16 @@ function ImageInputPanel({ onImageSelect }) {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {/* Zone d'upload intégrée */}
           <div
-            className="group cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-3 hover:border-blue-400 hover:bg-blue-50 transition-all"
+            className="group cursor-pointer border-2 border-dashed border-border rounded-lg p-3 hover:border-blue-400 hover:bg-accent transition-all"
             onClick={handleUploadClick}
           >
-            <div className="aspect-square bg-gray-50 rounded-md mb-2 flex flex-col items-center justify-center">
+            <div className="aspect-square bg-muted rounded-md mb-2 flex flex-col items-center justify-center">
               <div className="text-2xl mb-1">📤</div>
-              <div className="text-xs text-center text-gray-600 group-hover:text-blue-600">
+              <div className="text-xs text-center text-muted-foreground group-hover:text-blue-600">
                 Télécharger
               </div>
             </div>
-            <p className="text-xs text-center text-gray-500 group-hover:text-blue-600">
+            <p className="text-xs text-center text-muted-foreground group-hover:text-blue-600">
               Glisser-déposer ou cliquer
             </p>
             {/* Input fichier caché */}
@@ -195,10 +195,10 @@ function ImageInputPanel({ onImageSelect }) {
           {sampleImages.map((image) => (
             <div
               key={image.id}
-              className="group cursor-pointer border-2 border-gray-200 rounded-lg p-2 hover:border-blue-300 transition-colors"
+              className="group cursor-pointer border-2 border-border rounded-lg p-2 hover:border-blue-300 transition-colors"
               onClick={() => handleSampleImageSelect(image)}
             >
-              <div className="aspect-square bg-gray-100 rounded-md mb-2 flex items-center justify-center overflow-hidden">
+              <div className="aspect-square bg-muted rounded-md mb-2 flex items-center justify-center overflow-hidden">
                 {imagesLoaded[image.id] ? (
                   <img
                     src={image.path}
@@ -206,39 +206,39 @@ function ImageInputPanel({ onImageSelect }) {
                     className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform"
                   />
                 ) : (
-                  <div className="text-gray-400 text-xs text-center">
+                  <div className="text-muted-foreground text-xs text-center">
                     Image non disponible
                   </div>
                 )}
               </div>
-              <p className="text-xs text-center text-gray-600 group-hover:text-blue-600 transition-colors">
+              <p className="text-xs text-center text-muted-foreground group-hover:text-blue-600 transition-colors">
                 {image.name}
               </p>
             </div>
           ))}
+{/* Remplissage si pas assez d'images */}
+{sampleImages.length === 0 && Array.from({ length: 4 }).map((_, index) => (
+  <div
+    key={`placeholder-${index}`}
+    className="border-2 border-muted rounded-lg p-2 opacity-50"
+  >
+    <div className="aspect-square bg-muted rounded-md mb-2 flex items-center justify-center">
+      <div className="text-muted-foreground text-xs">Vide</div>
+    </div>
+    <p className="text-xs text-center text-muted-foreground">
+      Pas d'image
+    </p>
+  </div>
+))}
 
-          {/* Remplissage si pas assez d'images */}
-          {sampleImages.length === 0 && Array.from({ length: 4 }).map((_, index) => (
-            <div
-              key={`placeholder-${index}`}
-              className="border-2 border-gray-100 rounded-lg p-2 opacity-50"
-            >
-              <div className="aspect-square bg-gray-50 rounded-md mb-2 flex items-center justify-center">
-                <div className="text-gray-300 text-xs">Vide</div>
-              </div>
-              <p className="text-xs text-center text-gray-400">
-                Pas d'image
-              </p>
-            </div>
-          ))}
-        </div>
+</div>
 
-        {/* Message d'aide */}
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-500">
-            Cliquez sur une vignette pour sélectionner une image et lancer l'analyse
-          </p>
-        </div>
+{/* Message d'aide */}
+<div className="mt-4 text-center">
+<p className="text-xs text-muted-foreground">
+  Cliquez sur une vignette pour sélectionner une image et lancer l'analyse
+</p>
+</div>
       </CardContent>
     </Card>
   )
