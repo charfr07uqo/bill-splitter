@@ -18,7 +18,7 @@
  * @author Équipe Développement
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import ApiKeyManager, { useApiKey } from './components/ApiKeyManager'
 import Settings from './components/Settings'
 import ImageInputPanel from './components/ImageInputPanel'
@@ -70,6 +70,9 @@ function useSelectedModel() {
 function App() {
   // État pour la navigation
   const [currentPage, setCurrentPage] = useState('main') // 'main' ou 'settings'
+
+  // Ref pour le panneau d'image pour le défilement
+  const imagePanelRef = useRef(null)
 
   // Gestion de la clé API
   const { apiKey } = useApiKey()
@@ -197,6 +200,14 @@ Only return the JSON array, no other text or explanation.`
     setUploadedFile(file)
     setFinalFile(null) // Reset du fichier final
     setIsCropping(false) // Reset du mode recadrage
+
+    // Défiler vers le panneau d'image après un court délai pour permettre le rendu
+    setTimeout(() => {
+      imagePanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }, 100)
   }
 
   /**
@@ -288,7 +299,7 @@ Only return the JSON array, no other text or explanation.`
 
         {/* Interface de recadrage */}
         {isCropping && uploadedFile && (
-          <div className="flex justify-center">
+          <div className="fixed inset-0 z-50 bg-white md:relative md:inset-auto md:z-auto md:bg-transparent md:flex md:justify-center">
             <ImageCropper
               imageFile={uploadedFile}
               onCropComplete={handleCropComplete}
@@ -300,7 +311,7 @@ Only return the JSON array, no other text or explanation.`
         {/* Affichage côte à côte : image et tableau */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Affichage de l'image avec bouton intégré */}
-          <div className="xl:col-span-1">
+          <div className="xl:col-span-1" ref={imagePanelRef}>
             <ImageDisplay
               file={finalFile || uploadedFile}
               onProcessClick={handleProcessInvoice}

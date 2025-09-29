@@ -1,15 +1,18 @@
 /**
- * Composant de recadrage d'image - Outil de crop pour les factures
+ * Composant de recadrage d'image - Outil de crop pour les factures avec zoom
  *
  * Fonctionnalités métier :
  * - Interface de recadrage intuitive avec sélection rectangulaire
+ * - Contrôles de zoom pour agrandir l'image (50% à 300%)
+ * - Mode plein écran sur mobile pour une meilleure visibilité
  * - Aperçu en temps réel du résultat
  * - Boutons de validation et d'annulation
  * - Export de l'image recadrée pour le traitement
  *
  * Objectif : Permettre à l'utilisateur de sélectionner
  * précisément la zone de la facture à analyser, éliminant
- * les éléments parasites de l'image.
+ * les éléments parasites de l'image, avec possibilité
+ * d'agrandir l'image pour plus de précision.
  *
  * @created 2025-09-28
  * @author Équipe Développement
@@ -22,7 +25,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 /**
- * Composant ImageCropper - Outil de recadrage d'image
+ * Composant ImageCropper - Outil de recadrage d'image avec zoom
  * @param {Object} props - Les propriétés du composant
  * @param {File} props.imageFile - Le fichier image original
  * @param {Function} props.onCropComplete - Fonction appelée avec l'image recadrée
@@ -33,6 +36,7 @@ function ImageCropper({ imageFile, onCropComplete, onCancel }) {
   const [crop, setCrop] = useState()
   const [completedCrop, setCompletedCrop] = useState()
   const [imageSrc, setImageSrc] = useState('')
+  const [zoom, setZoom] = useState(1)
   const imgRef = useRef(null)
 
   // Charger l'image
@@ -142,33 +146,55 @@ function ImageCropper({ imageFile, onCropComplete, onCancel }) {
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full h-full md:max-w-4xl md:mx-auto md:h-auto md:flex md:flex-col md:justify-center">
       <CardHeader>
         <CardTitle className="text-center">Recadrer la Facture</CardTitle>
         <p className="text-sm text-muted-foreground text-center">
           Sélectionnez la zone contenant la facture
         </p>
+        {/* Contrôles de zoom */}
+        <div className="flex items-center justify-center space-x-4 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZoom(Math.max(0.5, zoom - 0.25))}
+            disabled={zoom <= 0.5}
+          >
+            Zoom -
+          </Button>
+          <span className="text-sm font-medium">{Math.round(zoom * 100)}%</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZoom(Math.min(3, zoom + 0.25))}
+            disabled={zoom >= 3}
+          >
+            Zoom +
+          </Button>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex justify-center">
+      <CardContent className="space-y-4 flex-1 flex flex-col justify-center h-full md:h-auto">
+        <div className="flex justify-center flex-1">
           <ReactCrop
             crop={crop}
             onChange={setCrop}
             onComplete={setCompletedCrop}
+            zoom={zoom}
+            onZoomChange={setZoom}
             aspect={undefined} // Pas de ratio forcé pour les factures
-            className="max-w-full max-h-96"
+            className="max-w-full max-h-full md:max-h-[70vh]"
           >
             <img
               ref={imgRef}
               src={imageSrc}
               alt="Image à recadrer"
               onLoad={onImageLoad}
-              className="max-w-full max-h-96 object-contain"
+              className="max-w-full max-h-full object-contain"
             />
           </ReactCrop>
         </div>
 
-        <div className="flex justify-center space-x-4">
+        <div className="flex justify-center space-x-4 mt-auto">
           <Button variant="outline" onClick={handleCancel}>
             Annuler
           </Button>
@@ -182,7 +208,7 @@ function ImageCropper({ imageFile, onCropComplete, onCancel }) {
         </div>
 
         <div className="text-xs text-muted-foreground text-center">
-          Utilisez la souris pour ajuster la zone de sélection
+          Utilisez la souris pour ajuster la zone de sélection ou les boutons de zoom
         </div>
       </CardContent>
     </Card>
