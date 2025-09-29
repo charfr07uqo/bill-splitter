@@ -139,7 +139,7 @@ function TriStateCheckbox({ value = 'commun', onChange, disabled = false, splitC
       onClick={handleClick}
       disabled={disabled}
       className={`
-        h-6 w-8 p-0 text-xs font-bold transition-colors duration-200
+        h-8 sm:h-6 w-10 sm:w-8 p-0 text-xs sm:text-xs font-bold transition-colors duration-200
         ${config.color} ${config.hoverColor}
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
       `}

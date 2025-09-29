@@ -111,24 +111,28 @@ function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, show
 
         {/* Onglets pour l'affichage du contenu */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-           <TabsList className="grid w-full grid-cols-4">
-             <TabsTrigger value="image" className="flex items-center gap-1 text-xs">
-               <Image className="h-3 w-3" />
-               Image
-             </TabsTrigger>
-             <TabsTrigger value="request" className="flex items-center gap-1 text-xs">
-               <MessageSquare className="h-3 w-3" />
-               Requête
-             </TabsTrigger>
-             <TabsTrigger value="raw" className="flex items-center gap-1 text-xs">
-               <FileText className="h-3 w-3" />
-               Brut
-             </TabsTrigger>
-             <TabsTrigger value="result" className="flex items-center gap-1 text-xs">
-               <FileText className="h-3 w-3" />
-               Traité
-             </TabsTrigger>
-           </TabsList>
+           <TabsList className="grid w-full grid-cols-4 h-12">
+              <TabsTrigger value="image" className="flex items-center gap-1 text-xs sm:text-sm h-10 sm:h-8">
+                <Image className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Image</span>
+                <span className="sm:hidden">Img</span>
+              </TabsTrigger>
+              <TabsTrigger value="request" className="flex items-center gap-1 text-xs sm:text-sm h-10 sm:h-8">
+                <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Requête</span>
+                <span className="sm:hidden">Req</span>
+              </TabsTrigger>
+              <TabsTrigger value="raw" className="flex items-center gap-1 text-xs sm:text-sm h-10 sm:h-8">
+                <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Brut</span>
+                <span className="sm:hidden">Raw</span>
+              </TabsTrigger>
+              <TabsTrigger value="result" className="flex items-center gap-1 text-xs sm:text-sm h-10 sm:h-8">
+                <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Traité</span>
+                <span className="sm:hidden">Res</span>
+              </TabsTrigger>
+            </TabsList>
 
           {/* Onglet Image */}
           <TabsContent value="image" className="mt-4">
