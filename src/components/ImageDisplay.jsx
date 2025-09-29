@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/tabs"
 import { Image, MessageSquare, FileText } from 'lucide-react'
 import ImageCropper from './ImageCropper'
+import ApiKeyGuide from './ApiKeyGuide'
 
 /**
  * Composant d'affichage d'image - Affiche une image avec bouton d'analyse intégré
@@ -31,7 +32,7 @@ import ImageCropper from './ImageCropper'
  * @created 2025-09-28
  * @author Équipe Développement
  */
-function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, showCropButton = false, requestData = null, resultData = null, rawResultData = null, onRequestChange = null, isCropping = false, onCropComplete = null, onCropCancel = null, uploadedFile = null }) {
+function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, showCropButton = false, requestData = null, resultData = null, rawResultData = null, onRequestChange = null, isCropping = false, onCropComplete = null, onCropCancel = null, uploadedFile = null, onGoToSettings = null }) {
   const [imageUrl, setImageUrl] = useState(null)
   const [activeTab, setActiveTab] = useState('image')
 
@@ -90,8 +91,8 @@ function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, show
             </div>
           )}
 
-          {/* Bouton d'analyse */}
-          {apiKey && onProcessClick && (
+          {/* Bouton d'analyse ou guide API key */}
+          {apiKey && onProcessClick ? (
             <div className="flex justify-center">
               <Button
                 onClick={onProcessClick}
@@ -101,6 +102,10 @@ function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, show
                 {loading ? '🔄 Analyse en cours...' : '🚀 Lancer l\'analyse avec Gemini'}
               </Button>
             </div>
+          ) : (
+            onGoToSettings && (
+              <ApiKeyGuide onGoToSettings={onGoToSettings} />
+            )
           )}
         </div>
 

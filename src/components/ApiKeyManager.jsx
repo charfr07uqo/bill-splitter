@@ -14,63 +14,104 @@
  * @author Équipe Développement
  */
 
-import React, { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-
-const API_KEY_STORAGE_KEY = 'googleGeminiApiKey'
-
-/**
- * Hook personnalisé pour gérer la clé API
- * Fournit l'accès à la clé API et la fonction de sauvegarde
- */
-export function useApiKey() {
-  const [apiKey, setApiKey] = useState('')
-
-  useEffect(() => {
-    // Chargement de la clé depuis localStorage au montage
-    const stored = localStorage.getItem(API_KEY_STORAGE_KEY)
-    if (stored) setApiKey(stored)
-  }, [])
-
-  /**
-   * Sauvegarde la clé API dans localStorage
-   * @param {string} key - La clé API à sauvegarder
-   */
-  const saveApiKey = (key) => {
-    localStorage.setItem(API_KEY_STORAGE_KEY, key)
-    setApiKey(key)
-  }
-
-  return { apiKey, saveApiKey }
-}
+import { CheckCircle, Clock, AlertCircle } from 'lucide-react'
+import { useApiKey } from '../hooks/useApiKey'
 
 /**
  * Composant de gestion des clés API
- * Interface pour saisir et sauvegarder la clé Google Gemini
+ * Interface pour saisir automatiquement la clé Google Gemini
  */
 function ApiKeyManager() {
   const { apiKey, saveApiKey } = useApiKey()
   const [inputValue, setInputValue] = useState(apiKey)
+  const [saveStatus, setSaveStatus] = useState('saved') // 'saved', 'saving', 'unsaved'
+  const saveTimeoutRef = useRef(null)
 
   useEffect(() => {
     // Synchronisation de la valeur d'entrée avec la clé chargée
     setInputValue(apiKey)
+    setSaveStatus('saved')
   }, [apiKey])
 
+  // Nettoyage du timeout lors du démontage du composant
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [])
+
   /**
-   * Gestionnaire de sauvegarde de la clé API
+   * Gestionnaire de changement de la valeur d'entrée
+   * Déclenche la sauvegarde automatique après un délai
    */
-  const handleSave = () => {
-    if (inputValue.trim()) {
-      saveApiKey(inputValue.trim())
+  const handleInputChange = useCallback((e) => {
+    const newValue = e.target.value
+    setInputValue(newValue)
+    setSaveStatus('unsaved')
+
+    // Annuler le timeout précédent s'il existe
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    // Sauvegarde automatique avec délai pour éviter trop d'appels
+    saveTimeoutRef.current = setTimeout(() => {
+      setSaveStatus('saving')
+
+      // Sauvegarde ou effacement selon la valeur
+      if (newValue.trim()) {
+        saveApiKey(newValue.trim())
+        setSaveStatus('saved')
+      } else {
+        // Effacement automatique si le champ est vide
+        localStorage.removeItem(API_KEY_STORAGE_KEY)
+        saveApiKey('')
+        setSaveStatus('saved')
+      }
+    }, 1000) // Délai de 1 seconde
+  }, [saveApiKey])
+
+  /**
+   * Rendu du statut de sauvegarde avec icône
+   */
+  const renderSaveStatus = () => {
+    switch (saveStatus) {
+      case 'saving':
+        return (
+          <div className="flex items-center gap-2 text-blue-600">
+            <Clock className="h-4 w-4" />
+            <span className="text-sm">Sauvegarde en cours...</span>
+          </div>
+        )
+      case 'saved':
+        return apiKey ? (
+          <div className="flex items-center gap-2 text-green-600">
+            <CheckCircle className="h-4 w-4" />
+            <span className="text-sm">Clé API sauvegardée automatiquement</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-gray-500">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-sm">Aucune clé API configurée</span>
+          </div>
+        )
+      case 'unsaved':
+        return (
+          <div className="flex items-center gap-2 text-orange-600">
+            <Clock className="h-4 w-4" />
+            <span className="text-sm">Sauvegarde automatique dans 1 seconde...</span>
+          </div>
+        )
+      default:
+        return null
     }
   }
-
-  // Détermination du statut de sauvegarde
-  const isSaved = apiKey === inputValue && apiKey !== ''
 
   return (
     <Card>
@@ -85,17 +126,16 @@ function ApiKeyManager() {
             id="api-key"
             type="password"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Entrez votre clé API"
           />
-        </div>
-        <Button onClick={handleSave} disabled={!inputValue.trim()}>
-          Sauvegarder
-        </Button>
-        <div>
-          <p className="text-sm">
-            Statut: {isSaved ? 'Clé API sauvegardée' : 'Aucune clé sauvegardée'}
+          <p className="text-xs text-gray-500 mt-1">
+            La clé API est sauvegardée automatiquement après 1 seconde d'inactivité
           </p>
+        </div>
+
+        <div className="flex items-center justify-center">
+          {renderSaveStatus()}
         </div>
       </CardContent>
     </Card>

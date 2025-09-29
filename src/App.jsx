@@ -19,8 +19,9 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react'
-import ApiKeyManager, { useApiKey } from './components/ApiKeyManager'
+import ApiKeyManager from './components/ApiKeyManager'
 import Settings from './components/Settings'
+import { useApiKey } from './hooks/useApiKey'
 import ImageInputPanel from './components/ImageInputPanel'
 import ImageDisplay from './components/ImageDisplay'
 import ImageCropper from './components/ImageCropper'
@@ -317,6 +318,7 @@ Only return the JSON array, no other text or explanation.`
               onCropComplete={handleCropComplete}
               onCropCancel={handleCropCancel}
               uploadedFile={uploadedFile}
+              onGoToSettings={() => setCurrentPage('settings')}
             />
           </div>
 
