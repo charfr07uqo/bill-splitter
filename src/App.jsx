@@ -297,16 +297,6 @@ Only return the JSON array, no other text or explanation.`
         {/* Panneau d'entrée d'images combiné */}
         <ImageInputPanel onImageSelect={handleImageSelect} />
 
-        {/* Interface de recadrage */}
-        {isCropping && uploadedFile && (
-          <div className="fixed inset-0 z-50 bg-white md:relative md:inset-auto md:z-auto md:bg-transparent md:flex md:justify-center">
-            <ImageCropper
-              imageFile={uploadedFile}
-              onCropComplete={handleCropComplete}
-              onCancel={handleCropCancel}
-            />
-          </div>
-        )}
 
         {/* Affichage côte à côte : image et tableau */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -318,11 +308,15 @@ Only return the JSON array, no other text or explanation.`
               onCropClick={handleStartCropping}
               loading={loading}
               apiKey={apiKey}
-              showCropButton={uploadedFile && !isCropping && !finalFile}
+              showCropButton={uploadedFile && !isCropping}
               requestData={generateRequest()}
               resultData={debugData.result}
               rawResultData={debugData.rawResult}
               onRequestChange={handleRequestChange}
+              isCropping={isCropping}
+              onCropComplete={handleCropComplete}
+              onCropCancel={handleCropCancel}
+              uploadedFile={uploadedFile}
             />
           </div>
 

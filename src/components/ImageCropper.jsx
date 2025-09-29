@@ -30,9 +30,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
  * @param {File} props.imageFile - Le fichier image original
  * @param {Function} props.onCropComplete - Fonction appelée avec l'image recadrée
  * @param {Function} props.onCancel - Fonction appelée pour annuler le recadrage
+ * @param {boolean} [props.showZoomControls=true] - Afficher ou masquer les contrôles de zoom
  * @returns {JSX.Element} Le composant de recadrage
  */
-function ImageCropper({ imageFile, onCropComplete, onCancel }) {
+function ImageCropper({ imageFile, onCropComplete, onCancel, showZoomControls = true }) {
   const [crop, setCrop] = useState()
   const [completedCrop, setCompletedCrop] = useState()
   const [imageSrc, setImageSrc] = useState('')
@@ -152,26 +153,28 @@ function ImageCropper({ imageFile, onCropComplete, onCancel }) {
         <p className="text-sm text-muted-foreground text-center">
           Sélectionnez la zone contenant la facture
         </p>
-        {/* Contrôles de zoom */}
-        <div className="flex items-center justify-center space-x-4 mt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoom(Math.max(0.5, zoom - 0.25))}
-            disabled={zoom <= 0.5}
-          >
-            Zoom -
-          </Button>
-          <span className="text-sm font-medium">{Math.round(zoom * 100)}%</span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoom(Math.min(3, zoom + 0.25))}
-            disabled={zoom >= 3}
-          >
-            Zoom +
-          </Button>
-        </div>
+        {/* Contrôles de zoom - affichés seulement si showZoomControls est true */}
+        {showZoomControls && (
+          <div className="flex items-center justify-center space-x-4 mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setZoom(Math.max(0.5, zoom - 0.25))}
+              disabled={zoom <= 0.5}
+            >
+              Zoom -
+            </Button>
+            <span className="text-sm font-medium">{Math.round(zoom * 100)}%</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setZoom(Math.min(3, zoom + 0.25))}
+              disabled={zoom >= 3}
+            >
+              Zoom +
+            </Button>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-4 flex-1 flex flex-col justify-center h-full md:h-auto">
         <div className="flex justify-center flex-1">

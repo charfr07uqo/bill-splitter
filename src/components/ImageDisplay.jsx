@@ -13,6 +13,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import { Image, MessageSquare, FileText } from 'lucide-react'
+import ImageCropper from './ImageCropper'
 
 /**
  * Composant d'affichage d'image - Affiche une image avec bouton d'analyse intégré
@@ -30,7 +31,7 @@ import { Image, MessageSquare, FileText } from 'lucide-react'
  * @created 2025-09-28
  * @author Équipe Développement
  */
-function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, showCropButton = false, requestData = null, resultData = null, rawResultData = null, onRequestChange = null }) {
+function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, showCropButton = false, requestData = null, resultData = null, rawResultData = null, onRequestChange = null, isCropping = false, onCropComplete = null, onCropCancel = null, uploadedFile = null }) {
   const [imageUrl, setImageUrl] = useState(null)
   const [activeTab, setActiveTab] = useState('image')
 
@@ -50,6 +51,13 @@ function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, show
       setImageUrl(null)
     }
   }, [file])
+
+  // Basculer vers l'onglet image quand le mode recadrage est activé
+  useEffect(() => {
+    if (isCropping) {
+      setActiveTab('image')
+    }
+  }, [isCropping])
 
   // Gestion du cas où aucune image n'est fournie
   if (!imageUrl) {
@@ -119,30 +127,39 @@ function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, show
 
           {/* Onglet Image */}
           <TabsContent value="image" className="mt-4">
-            <Dialog>
-              <DialogTrigger asChild>
-                <img
-                  src={imageUrl}
-                  alt="Image téléchargée - Cliquez pour agrandir"
-                  className="max-w-full h-auto rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200"
-                />
-              </DialogTrigger>
-              <DialogContent className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 bg-black/90">
-                <div className="w-full h-full flex items-center justify-center">
+            {isCropping && uploadedFile ? (
+              <ImageCropper
+                imageFile={uploadedFile}
+                onCropComplete={onCropComplete}
+                onCancel={onCropCancel}
+                showZoomControls={false}
+              />
+            ) : (
+              <Dialog>
+                <DialogTrigger asChild>
                   <img
                     src={imageUrl}
-                    alt="Image en plein écran"
-                    className="max-w-full max-h-full object-contain"
-                    style={{
-                      width: 'auto',
-                      height: 'auto',
-                      maxWidth: '100vw',
-                      maxHeight: '100vh'
-                    }}
+                    alt="Image téléchargée - Cliquez pour agrandir"
+                    className="max-w-full h-auto rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200"
                   />
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 bg-black/90">
+                  <div className="w-full h-full flex items-center justify-center">
+                    <img
+                      src={imageUrl}
+                      alt="Image en plein écran"
+                      className="max-w-full max-h-full object-contain"
+                      style={{
+                        width: 'auto',
+                        height: 'auto',
+                        maxWidth: '100vw',
+                        maxHeight: '100vh'
+                      }}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
           </TabsContent>
 
           {/* Onglet Requête */}
