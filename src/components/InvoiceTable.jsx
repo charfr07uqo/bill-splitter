@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/hooks/useTheme"
-import { MoreHorizontal, Plus, Trash2 } from "lucide-react"
+import { MoreHorizontal, Plus, Trash2, Copy } from "lucide-react"
 import TriStateCheckbox from "./TriStateCheckbox"
 
 /**
@@ -333,6 +333,27 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
   // Formatage du montant en dollars canadiens (toujours 2 décimales)
   const formatAmount = (amount) => `${Number(amount).toFixed(2)} $`
 
+  // Fonction pour copier le montant (sans le symbole $)
+  const copyAmount = async (amount, label) => {
+    try {
+      const amountText = Number(amount).toFixed(2)
+      await navigator.clipboard.writeText(amountText)
+      toast({
+        title: "Montant copié",
+        description: `${amountText} $ copié pour ${label}`,
+        duration: 2000,
+      })
+    } catch (error) {
+      console.error('Erreur lors de la copie:', error)
+      toast({
+        title: "Erreur",
+        description: "Impossible de copier le montant",
+        variant: "destructive",
+        duration: 2000,
+      })
+    }
+  }
+
   // Liste des groupes pour l'affichage des totaux (Commun en premier)
   const displayGroups = [{ id: 'commun', name: 'Commun' }, ...splitConfig.filter(g => g.id !== 'commun')]
 
@@ -388,22 +409,6 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
 
             return (
               <React.Fragment key={index}>
-                {/* Bouton d'ajout avant la première ligne */}
-                {index === 0 && (
-                  <TableRow className="border-0">
-                    <TableCell colSpan={7} className="text-center py-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleAddRow(-1)}
-                        className="h-5 w-5 p-0 text-muted-foreground hover:text-blue-600 text-xs"
-                      >
-                        +
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )}
-
                 {/* Ligne de suppression en attente */}
                 {isPendingDeletion ? (
                   <TableRow className="bg-red-50 border-red-200">
@@ -447,7 +452,7 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                           setEditableItems(updatedItems)
                           if (onItemsChange) onItemsChange(updatedItems)
                         }}
-                        className="border-0 p-0 h-auto bg-transparent focus:bg-white text-sm"
+                        className="border-0 p-0 h-auto bg-transparent focus:bg-background text-sm"
                         placeholder="Nom de l'article"
                       />
                     </TableCell>
@@ -458,7 +463,7 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                         value={item.amount || ''}
                         onChange={(e) => handleAmountChange(index, e.target.value)}
                         onBlur={() => handleAmountBlur(index)}
-                        className="w-20 text-right border-0 p-0 h-auto bg-transparent focus:bg-white text-sm"
+                        className="w-20 text-right border-0 p-0 h-auto bg-transparent focus:bg-background text-sm"
                         placeholder="0.00"
                       />
                     </TableCell>
@@ -467,7 +472,7 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                         value={item.taxCode || 'rien'}
                         onValueChange={(value) => handleTaxCodeChange(index, value)}
                       >
-                        <SelectTrigger className="w-20 h-8 border-0 bg-transparent focus:bg-white">
+                        <SelectTrigger className="w-20 h-8 border-0 bg-transparent focus:bg-background">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -540,22 +545,6 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                     </TableCell>
                   </TableRow>
                 )}
-
-                {/* Bouton d'ajout entre les lignes (compact) - seulement si pas en suppression */}
-                {!isPendingDeletion && (
-                  <TableRow className="border-0">
-                    <TableCell colSpan={7} className="text-center py-0.5">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleAddRow(index)}
-                        className="h-4 w-4 p-0 text-muted-foreground hover:text-blue-600 text-xs"
-                      >
-                        +
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )}
               </React.Fragment>
             );
           })
@@ -565,22 +554,55 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
         <TableFooter>
           <TableRow>
             <TableCell className="font-medium">Sous-total</TableCell>
-            <TableCell className="text-right font-medium" colSpan={3}>
+            <TableCell className="text-right font-medium" colSpan={2}>
               {formatAmount(totals.subtotal)}
+            </TableCell>
+            <TableCell className="text-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyAmount(totals.subtotal, "Sous-total")}
+                className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                title="Copier le montant"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
             </TableCell>
             <TableCell colSpan={2}></TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-medium">GST (5%)</TableCell>
-            <TableCell className="text-right font-medium" colSpan={3}>
+            <TableCell className="text-right font-medium" colSpan={2}>
               {formatAmount(totals.gst)}
+            </TableCell>
+            <TableCell className="text-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyAmount(totals.gst, "GST")}
+                className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                title="Copier le montant"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
             </TableCell>
             <TableCell colSpan={2}></TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-medium">QST (9.975%)</TableCell>
-            <TableCell className="text-right font-medium" colSpan={3}>
+            <TableCell className="text-right font-medium" colSpan={2}>
               {formatAmount(totals.qst)}
+            </TableCell>
+            <TableCell className="text-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyAmount(totals.qst, "QST")}
+                className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                title="Copier le montant"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
             </TableCell>
             <TableCell colSpan={2}></TableCell>
           </TableRow>
@@ -600,8 +622,19 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
            return (
              <TableRow key={group.id} className={colorClass}>
                <TableCell className="font-bold">{group.name}</TableCell>
-               <TableCell className="text-right font-bold" colSpan={3}>
+               <TableCell className="text-right font-bold" colSpan={2}>
                  {formatAmount(totalAmount)}
+               </TableCell>
+               <TableCell className="text-center">
+                 <Button
+                   variant="ghost"
+                   size="sm"
+                   onClick={() => copyAmount(totalAmount, group.name)}
+                   className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                   title="Copier le montant"
+                 >
+                   <Copy className="h-3 w-3" />
+                 </Button>
                </TableCell>
                <TableCell colSpan={2}></TableCell>
              </TableRow>
@@ -609,8 +642,19 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
          })}
           <TableRow className="border-t-2">
             <TableCell className="font-bold">Total</TableCell>
-            <TableCell className="text-right font-bold" colSpan={3}>
+            <TableCell className="text-right font-bold" colSpan={2}>
               {formatAmount(totals.total)}
+            </TableCell>
+            <TableCell className="text-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyAmount(totals.total, "Total")}
+                className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                title="Copier le montant"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
             </TableCell>
             <TableCell colSpan={2}></TableCell>
           </TableRow>
@@ -682,7 +726,7 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
         {loading ? (
           // Mobile loading state
           Array.from({ length: 3 }).map((_, index) => (
-            <div key={`mobile-skeleton-${index}`} className="bg-white border rounded-lg p-4 space-y-3">
+            <div key={`mobile-skeleton-${index}`} className="bg-card border rounded-lg p-4 space-y-3">
               <Skeleton className="h-4 w-3/4" />
               <div className="flex justify-between">
                 <Skeleton className="h-4 w-20" />
@@ -706,9 +750,9 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
             return (
               <div
                 key={`mobile-${index}`}
-                className={`bg-white border rounded-lg p-4 space-y-3 ${
-                  index === newlyAddedIndex ? 'bg-green-50 border-green-200 animate-pulse' :
-                  isPendingDeletion ? 'bg-red-50 border-red-200' : ''
+                className={`bg-card border rounded-lg p-4 space-y-3 ${
+                  index === newlyAddedIndex ? 'bg-green-900/20 border-green-700 animate-pulse' :
+                  isPendingDeletion ? 'bg-red-900/20 border-red-700' : ''
                 }`}
               >
                 {isPendingDeletion ? (
@@ -729,7 +773,7 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                         variant="outline"
                         size="sm"
                         onClick={() => handleUndoDelete(index)}
-                        className="text-red-600 border-red-300 hover:bg-red-50 h-8 px-3"
+                        className="text-red-400 border-red-700 hover:bg-red-900/20 h-8 px-3"
                       >
                         Annuler
                       </Button>
@@ -849,17 +893,50 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
         {/* Mobile Totals */}
         {!loading && editableItems.length > 0 && (
           <div className="bg-muted rounded-lg p-4 space-y-2">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="font-medium">Sous-total</span>
-              <span className="font-medium">{formatAmount(totals.subtotal)}</span>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{formatAmount(totals.subtotal)}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyAmount(totals.subtotal, "Sous-total")}
+                  className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                  title="Copier le montant"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+              </div>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="font-medium">GST (5%)</span>
-              <span className="font-medium">{formatAmount(totals.gst)}</span>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{formatAmount(totals.gst)}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyAmount(totals.gst, "GST")}
+                  className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                  title="Copier le montant"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+              </div>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="font-medium">QST (9.975%)</span>
-              <span className="font-medium">{formatAmount(totals.qst)}</span>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{formatAmount(totals.qst)}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyAmount(totals.qst, "QST")}
+                  className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                  title="Copier le montant"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+              </div>
             </div>
             {displayGroups.map((group) => {
               const totalKey = group.id + 'Total';
@@ -874,15 +951,37 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
               }
 
               return (
-                <div key={`mobile-${group.id}`} className={`flex justify-between font-bold rounded px-2 py-1 ${colorClass}`}>
+                <div key={`mobile-${group.id}`} className={`flex justify-between items-center font-bold rounded px-2 py-1 ${colorClass}`}>
                   <span>{group.name}</span>
-                  <span>{formatAmount(totalAmount)}</span>
+                  <div className="flex items-center gap-2">
+                    <span>{formatAmount(totalAmount)}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyAmount(totalAmount, group.name)}
+                      className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                      title="Copier le montant"
+                    >
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               );
             })}
-            <div className="flex justify-between font-bold text-lg border-t pt-2">
+            <div className="flex justify-between items-center font-bold text-lg border-t pt-2">
               <span>Total</span>
-              <span>{formatAmount(totals.total)}</span>
+              <div className="flex items-center gap-2">
+                <span>{formatAmount(totals.total)}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyAmount(totals.total, "Total")}
+                  className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                  title="Copier le montant"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+              </div>
             </div>
           </div>
         )}

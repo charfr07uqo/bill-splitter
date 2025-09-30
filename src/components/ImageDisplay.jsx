@@ -12,7 +12,15 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { Image, MessageSquare, FileText } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Image, MessageSquare, FileText, ChevronDown, Zap } from 'lucide-react'
 import ImageCropper from './ImageCropper'
 import ApiKeyGuide from './ApiKeyGuide'
 
@@ -32,7 +40,7 @@ import ApiKeyGuide from './ApiKeyGuide'
  * @created 2025-09-28
  * @author Équipe Développement
  */
-function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, showCropButton = false, requestData = null, resultData = null, rawResultData = null, onRequestChange = null, isCropping = false, onCropComplete = null, onCropCancel = null, uploadedFile = null, onGoToSettings = null }) {
+function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, showCropButton = false, requestData = null, resultData = null, rawResultData = null, onRequestChange = null, isCropping = false, onCropComplete = null, onCropCancel = null, uploadedFile = null, onGoToSettings = null, selectedModel = null, onModelChange = null, geminiModels = [] }) {
   const [imageUrl, setImageUrl] = useState(null)
   const [activeTab, setActiveTab] = useState('image')
 
@@ -94,13 +102,54 @@ function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, show
           {/* Bouton d'analyse ou guide API key */}
           {apiKey && onProcessClick ? (
             <div className="flex justify-center">
-              <Button
-                onClick={onProcessClick}
-                disabled={loading}
-                className="w-full"
-              >
-                {loading ? '🔄 Analyse en cours...' : '🚀 Lancer l\'analyse avec Gemini'}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    disabled={loading}
+                    className="w-full"
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    {loading ? '🔄 Analyse en cours...' : `🚀 Lancer l'analyse`}
+                    {!loading && <ChevronDown className="h-4 w-4 ml-2" />}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" className="w-64">
+                  {/* Sélecteur de modèle */}
+                  <div className="p-3 border-b">
+                    <label className="text-sm font-medium text-foreground mb-2 block">
+                      Modèle Gemini
+                    </label>
+                    <Select
+                      value={selectedModel || ''}
+                      onValueChange={onModelChange}
+                      disabled={loading}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Sélectionnez un modèle" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {geminiModels.map((model) => (
+                          <SelectItem key={model.value} value={model.value}>
+                            {model.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Bouton d'analyse */}
+                  <DropdownMenuItem
+                    onClick={onProcessClick}
+                    disabled={loading}
+                    className="w-full justify-center font-medium"
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    {loading ? 'Analyse en cours...' : 'Lancer l\'analyse'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ) : (
             onGoToSettings && (

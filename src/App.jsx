@@ -274,22 +274,6 @@ Only return the JSON array, no other text or explanation.`
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Bill Splitter</h1>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
-            {/* Sélection du modèle dans l'entête */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-foreground">Modèle:</span>
-              <Select value={selectedModel} onValueChange={handleModelChange}>
-                <SelectTrigger className="w-full sm:w-48 h-10">
-                  <SelectValue placeholder="Sélectionnez un modèle" />
-                </SelectTrigger>
-                <SelectContent>
-                  {GEMINI_MODELS.map((model) => (
-                    <SelectItem key={model.value} value={model.value}>
-                      {model.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
             <ThemeToggle />
             <Button variant="outline" onClick={() => setCurrentPage('settings')} className="h-10 px-4">
               ⚙️ Paramètres
@@ -321,6 +305,9 @@ Only return the JSON array, no other text or explanation.`
               onCropCancel={handleCropCancel}
               uploadedFile={uploadedFile}
               onGoToSettings={() => setCurrentPage('settings')}
+              selectedModel={selectedModel}
+              onModelChange={handleModelChange}
+              geminiModels={GEMINI_MODELS}
             />
           </div>
 
