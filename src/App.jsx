@@ -39,6 +39,8 @@ const GEMINI_MODELS = [
   { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
   { value: 'gemini-2.5-flash-image-preview', label: 'Gemini 2.5 Flash Image Preview' },
   { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
+  { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+  { value: 'gemini-3-pro-preview', label: 'Gemini 3 Pro Preview' },
   { value: 'gemini-flash-latest', label: 'Gemini Flash Latest' }
 ]
 
