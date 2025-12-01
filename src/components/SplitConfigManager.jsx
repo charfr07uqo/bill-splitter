@@ -462,7 +462,7 @@ ${generateColorPrompt()}
 Return as a JSON array of objects with these properties:
 - name: string (item name)
 - amount: number (price in dollars, negative for discounts)
-- taxCode: string (FP, F, P, or null if no tax indicator)
+- taxCode: string (G, H, or null if no tax indicator)
 ${generateSplitStateDescription()}`}
             </pre>
           </div>

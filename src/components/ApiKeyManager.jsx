@@ -70,7 +70,6 @@ function ApiKeyManager() {
         setSaveStatus('saved')
       } else {
         // Effacement automatique si le champ est vide
-        localStorage.removeItem(API_KEY_STORAGE_KEY)
         saveApiKey('')
         setSaveStatus('saved')
       }

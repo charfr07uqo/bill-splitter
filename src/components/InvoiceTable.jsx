@@ -4,8 +4,8 @@
  * Fonctionnalités métier :
  * - Affichage d'une liste d'articles avec noms, montants de base et taxes
  * - Édition en ligne des montants et codes de taxes
- * - Calcul automatique des taxes GST (5%) et QST (9.975%) du Québec
- * - Support des codes de taxes (FP, F, P) selon les normes québécoises
+ * - Calcul automatique des taxes GST (5%) et HST (13%) de l'Ontario
+ * - Support des codes de taxes (G, H) selon les normes ontariennes
  * - Répartition automatique entre groupes configurés
  * - Calcul automatique du montant total incluant les taxes
  * - Gestion de l'état vide (aucun article)
@@ -115,33 +115,29 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
     }
   }, [newlyAddedIndex])
 
-  // Taux de taxes du Québec
+  // Taux de taxes de l'Ontario
   const GST_RATE = 0.05; // Taxe fédérale (GST)
-  const QST_RATE = 0.09975; // Taxe provinciale (QST)
+  const HST_RATE = 0.13; // Taxe harmonisée (HST)
 
   // Calcul des taxes pour chaque article
   const calculateItemTaxes = (item) => {
     const baseAmount = parseFloat(item.amount) || 0;
     let gst = 0;
-    let qst = 0;
+    let hst = 0;
 
     switch (item.taxCode) {
-      case 'FP':
-        gst = baseAmount * GST_RATE;
-        qst = baseAmount * QST_RATE;
-        break;
-      case 'F':
+      case 'G':
         gst = baseAmount * GST_RATE;
         break;
-      case 'P':
-        qst = baseAmount * QST_RATE;
+      case 'H':
+        hst = baseAmount * HST_RATE;
         break;
       default:
         // Pas de taxes si pas de code
         break;
     }
 
-    return { gst, qst, total: baseAmount + gst + qst };
+    return { gst, hst, total: baseAmount + gst + hst };
   };
 
   // Gestionnaire de modification du montant
@@ -325,10 +321,10 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
       ...acc,
       subtotal: acc.subtotal + (parseFloat(item.amount) || 0),
       gst: acc.gst + taxes.gst,
-      qst: acc.qst + taxes.qst,
+      hst: acc.hst + taxes.hst,
       total: acc.total + itemTotal,
     };
-  }, { subtotal: 0, gst: 0, qst: 0, total: 0 });
+  }, { subtotal: 0, gst: 0, hst: 0, total: 0 });
 
   // Formatage du montant en dollars canadiens (toujours 2 décimales)
   const formatAmount = (amount) => `${Number(amount).toFixed(2)} $`
@@ -477,19 +473,14 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="rien">-</SelectItem>
-                          <SelectItem value="F">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              F
+                          <SelectItem value="G">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              G (GST 5%)
                             </span>
                           </SelectItem>
-                          <SelectItem value="P">
+                          <SelectItem value="H">
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              P
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="FP">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              FP
+                              H (HST 13%)
                             </span>
                           </SelectItem>
                         </SelectContent>
@@ -589,15 +580,15 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
             <TableCell colSpan={2}></TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium">QST (9.975%)</TableCell>
+            <TableCell className="font-medium">HST (13%)</TableCell>
             <TableCell className="text-right font-medium" colSpan={2}>
-              {formatAmount(totals.qst)}
+              {formatAmount(totals.hst)}
             </TableCell>
             <TableCell className="text-center">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => copyAmount(totals.qst, "QST")}
+                onClick={() => copyAmount(totals.hst, "HST")}
                 className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
                 title="Copier le montant"
               >
@@ -833,19 +824,14 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="rien">-</SelectItem>
-                            <SelectItem value="F">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                F (GST 5%)
+                            <SelectItem value="G">
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                G (GST 5%)
                               </span>
                             </SelectItem>
-                            <SelectItem value="P">
+                            <SelectItem value="H">
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                P (QST 9.975%)
-                              </span>
-                            </SelectItem>
-                            <SelectItem value="FP">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                FP (GST + QST)
+                                H (HST 13%)
                               </span>
                             </SelectItem>
                           </SelectContent>
@@ -924,13 +910,13 @@ function InvoiceTable({ items = [], onItemsChange, loading = false, splitConfig 
               </div>
             </div>
             <div className="flex justify-between items-center">
-              <span className="font-medium">QST (9.975%)</span>
+              <span className="font-medium">HST (13%)</span>
               <div className="flex items-center gap-2">
-                <span className="font-medium">{formatAmount(totals.qst)}</span>
+                <span className="font-medium">{formatAmount(totals.hst)}</span>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => copyAmount(totals.qst, "QST")}
+                  onClick={() => copyAmount(totals.hst, "HST")}
                   className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
                   title="Copier le montant"
                 >

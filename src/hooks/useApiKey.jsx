@@ -13,15 +13,20 @@
  * @author Équipe Développement
  */
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, createContext, useContext } from 'react'
 
 const API_KEY_STORAGE_KEY = 'googleGeminiApiKey'
 
 /**
- * Hook personnalisé pour gérer la clé API
- * Fournit l'accès à la clé API et la fonction de sauvegarde
+ * Contexte pour partager l'état de la clé API entre composants
  */
-export function useApiKey() {
+const ApiKeyContext = createContext()
+
+/**
+ * Provider du contexte API key
+ * Doit envelopper l'application pour fournir l'état global
+ */
+export function ApiKeyProvider({ children }) {
   const [apiKey, setApiKey] = useState('')
 
   useEffect(() => {
@@ -44,5 +49,26 @@ export function useApiKey() {
     setApiKey(key)
   }
 
-  return { apiKey, saveApiKey }
+  const value = {
+    apiKey,
+    saveApiKey
+  }
+
+  return (
+    <ApiKeyContext.Provider value={value}>
+      {children}
+    </ApiKeyContext.Provider>
+  )
+}
+
+/**
+ * Hook personnalisé pour utiliser le contexte API key
+ * Fournit l'accès à la clé API et la fonction de sauvegarde
+ */
+export function useApiKey() {
+  const context = useContext(ApiKeyContext)
+  if (!context) {
+    throw new Error('useApiKey doit être utilisé dans un ApiKeyProvider')
+  }
+  return context
 }

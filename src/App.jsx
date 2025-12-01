@@ -2,6 +2,7 @@
  * Composant principal de l'application Bill Splitter
  *
  * Fonctionnalités métier :
+ * - Interface à onglets avec trois sections : sélection d'image, recadrage/traitement, résultats
  * - Gestion des clés API Google Gemini
  * - Téléchargement et affichage d'images de factures
  * - Traitement automatique des images avec Gemini
@@ -12,13 +13,13 @@
  *
  * Objectif : Fournir une application complète pour l'extraction
  * automatique des données de factures à partir d'images avec
- * une interface de configuration avancée.
+ * une interface de configuration avancée organisée en onglets.
  *
  * @created 2025-09-28
  * @author Équipe Développement
  */
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import ApiKeyManager from './components/ApiKeyManager'
 import Settings from './components/Settings'
 import ThemeToggle from './components/ThemeToggle'
@@ -31,6 +32,7 @@ import { useGeminiProcessing } from './hooks/useGeminiProcessing'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Toaster } from '@/components/ui/toaster'
 import { useSplitConfig } from './components/SplitConfigManager'
 
@@ -75,8 +77,8 @@ function App() {
   // État pour la navigation
   const [currentPage, setCurrentPage] = useState('main') // 'main' ou 'settings'
 
-  // Ref pour le panneau d'image pour le défilement
-  const imagePanelRef = useRef(null)
+  // État pour l'onglet actif
+  const [activeTab, setActiveTab] = useState('selection')
 
   // Gestion de la clé API
   const { apiKey } = useApiKey()
@@ -129,6 +131,13 @@ function App() {
     }))
   }, [splitConfig, generateColorPrompt])
 
+  // Passer à l'onglet résultat quand les données sont disponibles
+  useEffect(() => {
+    if (data?.items && data.items.length > 0) {
+      setActiveTab('result')
+    }
+  }, [data])
+
   // État pour le fichier téléchargé
   const [uploadedFile, setUploadedFile] = useState(null)
 
@@ -148,11 +157,10 @@ function App() {
       return customRequest
     }
 
-    const baseRequest = `Extract item names and amounts from this invoice/receipt image. Look for tax indicators at the end of lines (FP, F, or P) which indicate applicable taxes in Quebec, Canada:
+    const baseRequest = `Extract item names and amounts from this invoice/receipt image. Look for tax indicators at the end of lines (G or H) which indicate applicable taxes in Ontario, Canada:
 
-- FP = Both Federal (GST 5%) and Provincial (QST 9.975%) taxes apply
-- F = Only Federal tax (GST 5%) applies
-- P = Only Provincial tax (QST 9.975%) applies
+- G = Federal GST (5%) tax applies
+- H = Harmonized HST (13%) tax applies
 
 Important: If an amount ends with a '-' character (like "5.00-"), it represents a discount and should be negative (e.g., "5.00-" becomes -5.00).`
 
@@ -174,7 +182,7 @@ Important: If an amount ends with a '-' character (like "5.00-"), it represents 
 Return as a JSON array of objects with these properties:
 - name: string (item name)
 - amount: number (price in dollars, negative for discounts)
-- taxCode: string (FP, F, P, or null if no tax indicator)
+- taxCode: string (G, H, or null if no tax indicator)
 ${splitStateDescription}
 
 Only return the JSON array, no other text or explanation.`
@@ -204,14 +212,7 @@ Only return the JSON array, no other text or explanation.`
     setUploadedFile(file)
     setFinalFile(null) // Reset du fichier final
     setIsCropping(false) // Reset du mode recadrage
-
-    // Défiler vers le panneau d'image après un court délai pour permettre le rendu
-    setTimeout(() => {
-      imagePanelRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      })
-    }, 100)
+    setActiveTab('crop') // Passer à l'onglet de recadrage
   }
 
   /**
@@ -273,24 +274,33 @@ Only return the JSON array, no other text or explanation.`
     <div className="min-h-screen bg-background p-2 sm:p-4">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Navigation et titre */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex justify-between items-center gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Bill Splitter</h1>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button variant="outline" onClick={() => setCurrentPage('settings')} className="h-10 px-4">
-              ⚙️ Paramètres
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage('settings')}
+              className="h-10 w-10 p-0"
+              title="Paramètres"
+            >
+              ⚙️
             </Button>
           </div>
         </div>
 
-        {/* Panneau d'entrée d'images combiné */}
-        <ImageInputPanel onImageSelect={handleImageSelect} />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="selection">Sélection/Téléversement d'image</TabsTrigger>
+            <TabsTrigger value="crop">Recadrage/Requête</TabsTrigger>
+            <TabsTrigger value="result">Résultat</TabsTrigger>
+          </TabsList>
 
+          <TabsContent value="selection">
+            <ImageInputPanel onImageSelect={handleImageSelect} />
+          </TabsContent>
 
-        {/* Affichage côte à côte : image et tableau */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
-          {/* Affichage de l'image avec bouton intégré */}
-          <div className="xl:col-span-1" ref={imagePanelRef}>
+          <TabsContent value="crop">
             <ImageDisplay
               file={finalFile || uploadedFile}
               onProcessClick={handleProcessInvoice}
@@ -311,10 +321,7 @@ Only return the JSON array, no other text or explanation.`
               onModelChange={handleModelChange}
               geminiModels={GEMINI_MODELS}
             />
-          </div>
 
-          {/* Tableau des articles avec gestion des états - prend plus d'espace */}
-          <div className="xl:col-span-2 space-y-4">
             {loading && (
               <div className="text-center py-8">
                 <p className="text-lg">Traitement de l'image en cours avec {selectedModel}...</p>
@@ -326,8 +333,10 @@ Only return the JSON array, no other text or explanation.`
                 <p className="text-red-500 text-lg">Erreur lors du traitement : {error}</p>
               </div>
             )}
+          </TabsContent>
 
-            {editableItems.length > 0 && (
+          <TabsContent value="result">
+            {editableItems.length > 0 ? (
               <div className="w-full overflow-x-auto">
                 <InvoiceTable
                   items={editableItems}
@@ -336,15 +345,13 @@ Only return the JSON array, no other text or explanation.`
                   splitConfig={splitConfig}
                 />
               </div>
-            )}
-
-            {!uploadedFile && !loading && !error && (
+            ) : (
               <div className="text-center py-8">
-                <p className="text-muted-foreground">Téléchargez une image pour commencer</p>
+                <p className="text-muted-foreground">Aucun résultat disponible. Traitez une image pour voir les résultats.</p>
               </div>
             )}
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Toaster pour les notifications */}

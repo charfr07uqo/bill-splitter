@@ -198,7 +198,7 @@ function ImageDisplay({ file, onProcessClick, onCropClick, loading, apiKey, show
                   <img
                     src={imageUrl}
                     alt="Image téléchargée - Cliquez pour agrandir"
-                    className="max-w-full h-auto rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200"
+                    className="max-w-full max-h-[60vh] h-auto rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200 object-contain"
                   />
                 </DialogTrigger>
                 <DialogContent className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 bg-black/90">

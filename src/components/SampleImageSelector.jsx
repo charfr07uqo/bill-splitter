@@ -95,9 +95,11 @@ function SampleImageSelector({ onImageSelect }) {
       // Liste des images connues dans le dossier samples
       const knownImages = [
         'PXL_20231214_145157504.jpg',
+        'PXL_20240514_001755504.jpg',
         'PXL_20241024_233602796.jpg',
         'PXL_20250425_221833245.jpg',
-        'PXL_20250925_232322794.jpg'
+        'PXL_20250925_232322794.jpg',
+        'PXL_20251201_131009691.jpg'
       ]
 
       const images = []

@@ -60,11 +60,10 @@ export async function processInvoiceImage(apiKey, file, modelName = 'gemini-2.5-
       }
     }
 
-    const prompt = customPrompt || `Extract item names and amounts from this invoice/receipt image. Look for tax indicators at the end of lines (FP, F, or P) which indicate applicable taxes in Quebec, Canada:
+    const prompt = customPrompt || `Extract item names and amounts from this invoice/receipt image. Look for tax indicators at the end of lines (G or H) which indicate applicable taxes in Ontario, Canada:
 
-- FP = Both Federal (GST 5%) and Provincial (QST 9.975%) taxes apply
-- F = Only Federal tax (GST 5%) applies
-- P = Only Provincial tax (QST 9.975%) taxes apply
+- G = Federal GST (5%) tax applies
+- H = Harmonized HST (13%) tax applies
 
 Important: If an amount ends with a '-' character (like "5.00-"), it represents a discount and should be negative (e.g., "5.00-" becomes -5.00).
 
@@ -74,7 +73,7 @@ Also detect if any lines or amounts are highlighted with colors:
 Return as a JSON array of objects with these properties:
 - name: string (item name)
 - amount: number (price in dollars, negative for discounts)
-- taxCode: string (FP, F, P, or null if no tax indicator)
+- taxCode: string (G, H, or null if no tax indicator)
 - splitState: string (based on highlighting)
 
 Only return the JSON array, no other text or explanation.`;

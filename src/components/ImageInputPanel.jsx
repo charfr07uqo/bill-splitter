@@ -17,6 +17,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import FileUpload from './FileUpload'
 
 // Liste des extensions d'images supportées
@@ -66,6 +67,7 @@ const createReadableName = (filename) => {
 function ImageInputPanel({ onImageSelect }) {
   const [sampleImages, setSampleImages] = useState([])
   const [imagesLoaded, setImagesLoaded] = useState({})
+  const [currentSampleIndex, setCurrentSampleIndex] = useState(0)
   const fileInputRef = useRef(null)
 
   /**
@@ -104,6 +106,24 @@ function ImageInputPanel({ onImageSelect }) {
   }
 
   /**
+   * Navigation vers l'image précédente
+   */
+  const goToPreviousSample = () => {
+    setCurrentSampleIndex((prev) =>
+      prev === 0 ? sampleImages.length - 1 : prev - 1
+    )
+  }
+
+  /**
+   * Navigation vers l'image suivante
+   */
+  const goToNextSample = () => {
+    setCurrentSampleIndex((prev) =>
+      prev === sampleImages.length - 1 ? 0 : prev + 1
+    )
+  }
+
+  /**
    * Vérifie si une image existe
    * @param {string} path - Chemin de l'image
    * @returns {Promise<boolean>} True si l'image existe
@@ -123,9 +143,11 @@ function ImageInputPanel({ onImageSelect }) {
       // Liste des images connues dans le dossier samples
       const knownImages = [
         'PXL_20231214_145157504.jpg',
+        'PXL_20240514_001755504.jpg',
         'PXL_20241024_233602796.jpg',
         'PXL_20250425_221833245.jpg',
-        'PXL_20250925_232322794.jpg'
+        'PXL_20250925_232322794.jpg',
+        'PXL_20251201_131009691.jpg'
       ]
 
       const images = []
@@ -165,73 +187,77 @@ function ImageInputPanel({ onImageSelect }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Grille unifiée : Upload + Échantillons */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {/* Zone d'upload intégrée */}
-          <div
-            className="group cursor-pointer border-2 border-dashed border-border rounded-lg p-3 hover:border-blue-400 hover:bg-accent transition-all"
-            onClick={handleUploadClick}
-          >
-            <div className="aspect-square bg-muted rounded-md mb-2 flex flex-col items-center justify-center">
-              <div className="text-2xl mb-1">📤</div>
-              <div className="text-xs text-center text-muted-foreground group-hover:text-blue-600">
-                Télécharger
-              </div>
+        {/* Zone d'upload full width, reduced height */}
+        <div
+          className="group cursor-pointer border-2 border-dashed border-border rounded-lg p-4 hover:border-blue-400 hover:bg-accent transition-all mb-4"
+          onClick={handleUploadClick}
+        >
+          <div className="aspect-[4/1] bg-muted rounded-md flex flex-col items-center justify-center">
+            <div className="text-2xl mb-1">📤</div>
+            <div className="text-xs text-center text-muted-foreground group-hover:text-blue-600">
+              Télécharger une image
             </div>
-            <p className="text-xs text-center text-muted-foreground group-hover:text-blue-600">
-              Glisser-déposer ou cliquer
-            </p>
-            {/* Input fichier caché */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
           </div>
+          <p className="text-sm text-center text-muted-foreground group-hover:text-blue-600 mt-2">
+            Glisser-déposer ou cliquer pour sélectionner
+          </p>
+          {/* Input fichier caché */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </div>
 
-          {/* Échantillons d'images */}
-          {sampleImages.map((image) => (
+        {/* Carousel d'échantillons d'images */}
+        {sampleImages.length > 0 && (
+          <div className="relative">
+            <div className="flex items-center justify-between mb-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToPreviousSample}
+                disabled={sampleImages.length <= 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {currentSampleIndex + 1} / {sampleImages.length}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToNextSample}
+                disabled={sampleImages.length <= 1}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
             <div
-              key={image.id}
-              className="group cursor-pointer border-2 border-border rounded-lg p-2 hover:border-blue-300 transition-colors"
-              onClick={() => handleSampleImageSelect(image)}
+              className="group cursor-pointer border-2 border-border rounded-lg overflow-hidden hover:border-blue-300 transition-colors"
+              onClick={() => handleSampleImageSelect(sampleImages[currentSampleIndex])}
             >
-              <div className="aspect-square bg-muted rounded-md mb-2 flex items-center justify-center overflow-hidden">
-                {imagesLoaded[image.id] ? (
+              <div className="aspect-[16/9] bg-muted flex items-center justify-center overflow-hidden">
+                {imagesLoaded[sampleImages[currentSampleIndex].id] ? (
                   <img
-                    src={image.path}
-                    alt={image.name}
-                    className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform"
+                    src={sampleImages[currentSampleIndex].path}
+                    alt={sampleImages[currentSampleIndex].name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />
                 ) : (
-                  <div className="text-muted-foreground text-xs text-center">
+                  <div className="text-muted-foreground text-center">
                     Image non disponible
                   </div>
                 )}
               </div>
-              <p className="text-xs text-center text-muted-foreground group-hover:text-blue-600 transition-colors">
-                {image.name}
+              <p className="text-sm text-center text-muted-foreground group-hover:text-blue-600 p-2">
+                {sampleImages[currentSampleIndex].name}
               </p>
             </div>
-          ))}
-{/* Remplissage si pas assez d'images */}
-{sampleImages.length === 0 && Array.from({ length: 4 }).map((_, index) => (
-  <div
-    key={`placeholder-${index}`}
-    className="border-2 border-muted rounded-lg p-2 opacity-50"
-  >
-    <div className="aspect-square bg-muted rounded-md mb-2 flex items-center justify-center">
-      <div className="text-muted-foreground text-xs">Vide</div>
-    </div>
-    <p className="text-xs text-center text-muted-foreground">
-      Pas d'image
-    </p>
-  </div>
-))}
-
-</div>
+          </div>
+        )}
 
 {/* Message d'aide */}
 <div className="mt-4 text-center">

@@ -35,8 +35,7 @@ function generateStateConfig(splitConfig = []) {
 
   // Ajouter les groupes configurés
   splitConfig.forEach((group, index) => {
-    const nextIndex = (index + 1) % splitConfig.length
-    const nextGroup = splitConfig[nextIndex]
+    const nextGroup = splitConfig[index + 1]
 
     config[group.id] = {
       label: group.label,
